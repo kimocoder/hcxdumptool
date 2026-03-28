@@ -1313,7 +1313,7 @@ if(replaycountrg == replaycount)
 			(calist + i)->cadata->m2 = '+';
 			(calist + i)->cadata->channel = (scanlist + scanlistindex)->channel;
 			wanteventflag |= exiteapolm2rgflag;
-			if((calist + i)->cadata->akm == RSNPSK) writeepbm1wpa2();
+			if(IS_RSN_PSK_OR_SAE((calist + i)->cadata->akm)) writeepbm1wpa2();
 			else if((calist + i)->cadata->akm == WPAPSK) writeepbm1wpa1();
 			writeepb();
 			}
@@ -1778,7 +1778,7 @@ for(i = 0; i < APLIST_MAX - 1; i++)
 	memcpy((aplist + i)->apdata->macc, macfrx->addr1, ETH_ALEN);
 	if((aplist + i)->apdata->apcount <= 0) return;
 	if((aplist + i)->apdata->essidlen == 0) return;
-	if(((aplist + i)->apdata->akm != AKMPSK) && ((aplist + i)->apdata->akm != AKMPSK256)) return;
+	if(!IS_AKM_PSK_OR_SAE((aplist + i)->apdata->akm)) return;
 	if((aplist + i)->apdata->m1 == '+') return;
 	if((tsakt - (aplist + i)->apdata->tsreassocresponse) < TSSECOND05) return;
 	send_80211_ack();
@@ -1836,7 +1836,7 @@ for(i = 0; i < APLIST_MAX - 1; i++)
 	memcpy((aplist + i)->apdata->macc, macfrx->addr1, ETH_ALEN);
 	if((aplist + i)->apdata->apcount <= 0) return;
 	if((aplist + i)->apdata->essidlen == 0) return;
-	if(((aplist + i)->apdata->akm != AKMPSK) && ((aplist + i)->apdata->akm != AKMPSK256)) return;
+	if(!IS_AKM_PSK_OR_SAE((aplist + i)->apdata->akm)) return;
 	if((aplist + i)->apdata->m1 == '+') return;
 	if((tsakt - (aplist + i)->apdata->tsassocresponse) < TSSECOND05) return;
 	send_80211_ack();
@@ -1889,7 +1889,7 @@ if((macfrx->to_ds == 1) && (macfrx->power == 0))
 			if((tsakt - (calist + i)->cadata->tsassoc) > TSSECOND2) break;
 			(calist + i)->cadata->tsnull = tsakt;
 			(calist + i)->cadata->channel = (scanlist + scanlistindex)->channel;
-			if((calist + i)->cadata->akm == RSNPSK)
+			if(IS_RSN_PSK_OR_SAE((calist + i)->cadata->akm))
 				{
 				send_80211_ack();
 				send_80211_eapol_m1_wpa2();
@@ -1953,7 +1953,7 @@ if((macfrx->to_ds == 1) && (macfrx->power == 0))
 		if((calist + i)->cadata->clientcount <= 0) return;
 		if((tsakt - (calist + i)->cadata->tsnull) <= TSSECOND1) return;
 		if((tsakt - (calist + i)->cadata->tsnull) > TSSECOND2) break;
-		if((calist + i)->cadata->akm == RSNPSK)
+		if(IS_RSN_PSK_OR_SAE((calist + i)->cadata->akm))
 			{
 			send_80211_ack();
 			send_80211_eapol_m1_wpa2();
@@ -2066,6 +2066,9 @@ while(0 < infolen)
 			if(memcmp(rsnpsk, rsn->suite, SUITE_SIZE) == 0) return RSNPSK;
 			else if(memcmp(rsnpskft, rsn->suite, SUITE_SIZE) == 0) return RSNPSKFT;
 			else if(memcmp(rsnpsk256, rsn->suite, SUITE_SIZE) == 0) return RSNPSK256;
+			else if(memcmp(rsnsae, rsn->suite, SUITE_SIZE) == 0) return RSNSAE;
+			else if(memcmp(rsnsaeft, rsn->suite, SUITE_SIZE) == 0) return RSNSAEFT;
+			else if(memcmp(rsnowe, rsn->suite, SUITE_SIZE) == 0) return RSNOWE;
 			return 0;
 			}
 		}
@@ -2142,7 +2145,7 @@ for(i = 0; i < CALIST_MAX - 1; i++)
 	if((calist + i)->cadata->clientcount <= 0) return;
 	if((tsakt - (calist + i)->cadata->tsreassoc) < TSSECOND1) return;
 	(calist + i)->cadata->akm = get_akm((calist + i)->cadata, reassociationrequestlen, reassociationrequest->ie);
-	if((calist + i)->cadata->akm == RSNPSK)
+	if(IS_RSN_PSK_OR_SAE((calist + i)->cadata->akm))
 		{
 		send_80211_ack();
 		send_80211_reassociationresponse();
@@ -2172,7 +2175,7 @@ memcpy((calist + i)->cadata->macc, macfrx->addr2, ETH_ALEN);
 if(clientcountmax > 0)
 	{
 	(calist + i)->cadata->akm = get_akm((calist + i)->cadata, reassociationrequestlen, reassociationrequest->ie);
-	if((calist + i)->cadata->akm == RSNPSK)
+	if(IS_RSN_PSK_OR_SAE((calist + i)->cadata->akm))
 		{
 		send_80211_ack();
 		send_80211_reassociationresponse();
@@ -2248,7 +2251,7 @@ for(i = 0; i < CALIST_MAX - 1; i++)
 	if((calist + i)->cadata->clientcount <= 0) return;
 	if((tsakt - (calist + i)->cadata->tsassoc) < TSSECOND1) return;
 	(calist + i)->cadata->akm = get_akm((calist + i)->cadata, associationrequestlen, associationrequest->ie);
-	if((calist + i)->cadata->akm == RSNPSK)
+	if(IS_RSN_PSK_OR_SAE((calist + i)->cadata->akm))
 		{
 		send_80211_ack();
 		send_80211_associationresponse();
@@ -2278,7 +2281,7 @@ memcpy((calist + i)->cadata->macc, macfrx->addr2, ETH_ALEN);
 if(clientcountmax > 0)
 	{
 	(calist + i)->cadata->akm = get_akm((calist + i)->cadata, associationrequestlen, associationrequest->ie);
-	if((calist + i)->cadata->akm == RSNPSK)
+	if(IS_RSN_PSK_OR_SAE((calist + i)->cadata->akm))
 		{
 		(calist + i)->cadata->tsassoc = tsakt;
 		send_80211_ack();
@@ -2385,7 +2388,7 @@ if(auth->algorithm == OPEN_SYSTEM)
 				memcpy((aplist + i)->apdata->macc, macfrx->addr1, ETH_ALEN);
 				if((aplist + i)->apdata->apcount <= 0) return;
 				if((aplist + i)->apdata->essidlen == 0) return;
-				if(((aplist + i)->apdata->akm != AKMPSK) && ((aplist + i)->apdata->akm != AKMPSK256)) return;
+				if(!IS_AKM_PSK_OR_SAE((aplist + i)->apdata->akm)) return;
 				if((aplist + i)->apdata->m1 == '+') return;
 				if((tsakt - (aplist + i)->apdata->tsauthresponse) < TSSECOND05) return;
 				send_80211_ack();
@@ -2412,7 +2415,7 @@ if(auth->algorithm == OPEN_SYSTEM)
 				{
 				if((aplist + i)->apdata->essidlen != 0)
 					{
-					if(((aplist + i)->apdata->akm != AKMPSK) && ((aplist + i)->apdata->akm != AKMPSK256)) return;
+					if(!IS_AKM_PSK_OR_SAE((aplist + i)->apdata->akm)) return;
 						{
 						send_80211_ack();
 						send_80211_associationrequest2((aplist + i)->apdata);
@@ -2426,6 +2429,83 @@ if(auth->algorithm == OPEN_SYSTEM)
 			return;
 			}
 		}
+	return;
+	}
+else if(__hcx16le(auth->algorithm) == SAE_AUTH)
+	{
+	if(__hcx16le(auth->sequence) == 1) /* SAE Commit */
+		{
+		/* check if from AP (addr2 = AP MAC) */
+		for(i = 0; i < APLIST_MAX - 1; i++)
+			{
+			if((aplist + i)->tsakt == 0) break;
+			if(memcmp((aplist + i)->apdata->maca, macfrx->addr2, ETH_ALEN) != 0) continue;
+			(aplist + i)->tsakt = tsakt;
+			(aplist + i)->apdata->tssaecommit = tsakt;
+			(aplist + i)->apdata->privacy = 'e';
+			if((aplist + i)->apdata->saecommit == false)
+				{
+				(aplist + i)->apdata->saecommit = true;
+				writeepb();
+				}
+			return;
+			}
+		/* check if from client to AP (addr1 = AP MAC) */
+		for(i = 0; i < APLIST_MAX - 1; i++)
+			{
+			if((aplist + i)->tsakt == 0) break;
+			if(memcmp((aplist + i)->apdata->maca, macfrx->addr1, ETH_ALEN) != 0) continue;
+			(aplist + i)->tsakt = tsakt;
+			(aplist + i)->apdata->tssaecommit = tsakt;
+			(aplist + i)->apdata->privacy = 'e';
+			if(memcmp(macclientrg, (aplist + i)->apdata->macc, ETH_ALEN) == 0) (aplist + i)->apdata->apcount = apcountmax;
+			memcpy((aplist + i)->apdata->macc, macfrx->addr2, ETH_ALEN);
+			if((aplist + i)->apdata->saecommit == false)
+				{
+				(aplist + i)->apdata->saecommit = true;
+				writeepb();
+				}
+			return;
+			}
+		writeepb();
+		return;
+		}
+	else if(__hcx16le(auth->sequence) == 2) /* SAE Confirm */
+		{
+		/* check if from AP (addr2 = AP MAC) */
+		for(i = 0; i < APLIST_MAX - 1; i++)
+			{
+			if((aplist + i)->tsakt == 0) break;
+			if(memcmp((aplist + i)->apdata->maca, macfrx->addr2, ETH_ALEN) != 0) continue;
+			(aplist + i)->tsakt = tsakt;
+			(aplist + i)->apdata->tssaeconfirm = tsakt;
+			(aplist + i)->apdata->privacy = 'e';
+			if((aplist + i)->apdata->saeconfirm == false)
+				{
+				(aplist + i)->apdata->saeconfirm = true;
+				writeepb();
+				}
+			return;
+			}
+		/* check if from client to AP (addr1 = AP MAC) */
+		for(i = 0; i < APLIST_MAX - 1; i++)
+			{
+			if((aplist + i)->tsakt == 0) break;
+			if(memcmp((aplist + i)->apdata->maca, macfrx->addr1, ETH_ALEN) != 0) continue;
+			(aplist + i)->tsakt = tsakt;
+			(aplist + i)->apdata->tssaeconfirm = tsakt;
+			(aplist + i)->apdata->privacy = 'e';
+			if((aplist + i)->apdata->saeconfirm == false)
+				{
+				(aplist + i)->apdata->saeconfirm = true;
+				writeepb();
+				}
+			return;
+			}
+		writeepb();
+		return;
+		}
+	writeepb();
 	return;
 	}
 writeepb();
@@ -2710,6 +2790,21 @@ while(0 < infolen)
 							apdata->akm = infoptr->ie[tlen +3];
 							apdata->akmstat = 'p';
 							}
+						else if((apdata->akm == 0) && (memcmp(rsnsae, &infoptr->ie[tlen], 4) == 0))
+							{
+							apdata->akm = infoptr->ie[tlen +3];
+							apdata->akmstat = 's';
+							}
+						else if((apdata->akm == 0) && (memcmp(rsnsaeft, &infoptr->ie[tlen], 4) == 0))
+							{
+							apdata->akm = infoptr->ie[tlen +3];
+							apdata->akmstat = 's';
+							}
+						else if((apdata->akm == 0) && (memcmp(rsnowe, &infoptr->ie[tlen], 4) == 0))
+							{
+							apdata->akm = infoptr->ie[tlen +3];
+							apdata->akmstat = 'w';
+							}
 						tlen += 4;
 						if(tlen > infoptr->len) return;
 						}
@@ -2857,7 +2952,7 @@ if(apcountmax > 0)
 	{
 	if((aplist + i)->apdata->channel == (scanlist + scanlistindex)->channel)
 		{
-		if((aplist + i)->apdata->akm == AKMPSK)
+		if(IS_AKM_PSK_OR_SAE((aplist + i)->apdata->akm))
 			{
 			if((aplist + i)->apdata->essidlen != 0)
 				{
@@ -2944,14 +3039,15 @@ for(i = 0; i < APLIST_MAX - 1; i++)
 	if((aplist + i)->apdata->apcount <= 0) return;
 	if((aplist + i)->apdata->essidlen != 0)
 		{
-		if(((aplist + i)->apdata->akm == AKMPSK) || ((aplist + i)->apdata->akm == AKMPSK256))
+		if(IS_AKM_PSK_OR_SAE((aplist + i)->apdata->akm))
 			{
 			if(memcmp(macclientrg, (aplist + i)->apdata->macc, ETH_ALEN) == 0)
 				{
 				if((aplist + i)->apdata->m1 != '+')
 					{
 					send_80211_associationrequest2bc((aplist + i)->apdata);
-					send_80211_authenticationrequest((aplist + i)->apdata);
+					if(((aplist + i)->apdata->akm != AKMSAE) && ((aplist + i)->apdata->akm != AKMSAEFT))
+						send_80211_authenticationrequest((aplist + i)->apdata);
 					(aplist + i)->apdata->tsrequest = tsakt;
 					(aplist + i)->apdata->apcount -= 1;
 					}
@@ -3004,7 +3100,7 @@ if(apcountmax > 0)
 	{
 	if((aplist + i)->apdata->channel == (scanlist + scanlistindex)->channel)
 		{
-		if(((aplist + i)->apdata->akm == AKMPSK) || ((aplist + i)->apdata->akm == AKMPSK256))
+		if(IS_AKM_PSK_OR_SAE((aplist + i)->apdata->akm))
 			{
 			if((aplist + i)->apdata->essidlen != 0)
 				{

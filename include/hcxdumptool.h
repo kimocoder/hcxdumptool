@@ -153,6 +153,8 @@ typedef struct __attribute__((__packed__))
  u8	essidlen;
  u8	akm;
  char	m2;
+ u64	tssaecommit;
+ u64	tssaeconfirm;
  }cadata_t;
 #define CADATA_SIZE (sizeof(cadata_t))
 /*---------------------------------------------------------------------------*/
@@ -217,6 +219,10 @@ typedef struct __attribute__((__packed__))
  bool	suthentication;
  bool	associationresponse;
  bool	reassociationresponse;
+ u64	tssaecommit;
+ u64	tssaeconfirm;
+ bool	saecommit;
+ bool	saeconfirm;
  }apdata_t;
 #define APDATA_SIZE (sizeof(apdata_t))
 /*---------------------------------------------------------------------------*/

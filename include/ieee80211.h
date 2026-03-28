@@ -145,6 +145,7 @@ typedef struct __attribute__((__packed__))
 typedef struct __attribute__((__packed__))
 {
 #define OPEN_SYSTEM		0
+#define SAE_AUTH		3
 #define AUTHSUCCESS		0
  u16	algorithm;
  u16	sequence;
@@ -370,10 +371,19 @@ static u8 macbc[] =
 #define RSNPSK		2
 #define RSNPSKFT	3
 #define RSNPSK256	4
+#define RSNSAE		5
+#define RSNSAEFT	6
+#define RSNOWE		7
 
 #define AKMPSK		2
 #define AKMPSKFT	4
 #define AKMPSK256	6
+#define AKMSAE		8
+#define AKMSAEFT	9
+#define AKMOWE		18
+
+#define IS_AKM_PSK_OR_SAE(akm) ((akm) == AKMPSK || (akm) == AKMPSK256 || (akm) == AKMSAE || (akm) == AKMSAEFT || (akm) == AKMOWE)
+#define IS_RSN_PSK_OR_SAE(akm) ((akm) == RSNPSK || (akm) == RSNPSK256 || (akm) == RSNSAE || (akm) == RSNSAEFT || (akm) == RSNOWE)
 
 #define SUITE_SIZE	4
 static const u8 rsnpmkid[SUITE_SIZE] =
@@ -399,6 +409,18 @@ static const u8 rsnpskft[SUITE_SIZE] =
 static const u8 rsnpsk256[SUITE_SIZE] =
 {
 0x00, 0x0f, 0xac, 0x06
+};
+static const u8 rsnsae[SUITE_SIZE] =
+{
+0x00, 0x0f, 0xac, 0x08
+};
+static const u8 rsnsaeft[SUITE_SIZE] =
+{
+0x00, 0x0f, 0xac, 0x09
+};
+static const u8 rsnowe[SUITE_SIZE] =
+{
+0x00, 0x0f, 0xac, 0x12
 };
 static const u8 wpatype[SUITE_SIZE] =
 {
